@@ -20,6 +20,8 @@ RUN adduser -u 82 -D -S -G www-data www-data
 WORKDIR /var/www
 
 RUN <<EOF
+  set -e 
+
   apk add --no-cache \
     git \
     unzip \
@@ -36,6 +38,17 @@ RUN <<EOF
     composer
 
   which php-fpm || ln -s /usr/sbin/php-fpm* /usr/sbin/php-fpm
+  test -d /etc/php || ln -s /etc/php* /etc/php
+EOF
+
+RUN <<EOF
+  set -e 
+
+  sed -i 's|;error_log = .*|error_log = /proc/self/fd/2|' /etc/php/php-fpm.conf
+
+  echo 'access.log = /proc/self/fd/2' >> /etc/php/php-fpm.d/www.conf
+  echo 'catch_workers_output = yes' >> /etc/php/php-fpm.d/www.conf
+  echo 'listen = 9000' >> /etc/php/php-fpm.d/www.conf
 EOF
 
 COPY --from=downloader /work/movim /var/www/movim
@@ -51,11 +64,12 @@ RUN <<EOF
   chown www-data log cache public
 EOF
 
+WORKDIR /var/www/movim
+USER www-data
 ENTRYPOINT [ "tini", "--", "php-fpm" ]
+CMD [ "-F", "-O" ]
 
 FROM fpm as daemon
-
-RUN apk add --no-cache tini
 
 WORKDIR /var/www/movim
 COPY --chmod=0555 daemon-entrypoint.sh .
