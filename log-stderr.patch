@@ -1,0 +1,68 @@
+From 90e6a80b3b9f7720998b23c631df2c808dc94898 Mon Sep 17 00:00:00 2001
+From: Nadia Santalla <nadia@santalla.io>
+Date: Wed, 26 Feb 2025 09:34:30 +0100
+Subject: [PATCH] log to stderr instead of files
+
+---
+ app/Helpers/UtilsHelper.php | 6 +++---
+ src/Movim/Bootstrap.php     | 6 +-----
+ 2 files changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/app/Helpers/UtilsHelper.php b/app/Helpers/UtilsHelper.php
+index 9b5b37a13..c25b1f9c1 100644
+--- a/app/Helpers/UtilsHelper.php
++++ b/app/Helpers/UtilsHelper.php
+@@ -15,7 +15,7 @@ function logError(string|Stringable $logs)
+     $log = new Logger('movim');
+     $log->pushHandler(new SyslogHandler('movim'));
+ 
+-    $stream = new StreamHandler(config('paths.log') . '/errors.log');
++    $stream = new StreamHandler('php://stderr');
+     $stream->setFormatter(new LineFormatter(null, null, true, true));
+     $log->pushHandler($stream);
+ 
+@@ -31,7 +31,7 @@ function logInfo(string|Stringable $logs)
+         $log = new Logger('movim');
+         $log->pushHandler(new SyslogHandler('movim'));
+ 
+-        $stream = new StreamHandler(config('paths.log') . '/info.log');
++        $stream = new StreamHandler('php://stderr');
+         $stream->setFormatter(new LineFormatter(null, null, true));
+         $log->pushHandler($stream);
+ 
+@@ -45,7 +45,7 @@ function logInfo(string|Stringable $logs)
+ function logDebug($logs)
+ {
+     $log = new Logger('movim');
+-    $log->pushHandler(new StreamHandler(config('paths.log') . '/debug.log'));
++    $log->pushHandler(new StreamHandler('php://stderr'));
+     if (is_array($logs)) {
+         $log->debug('', $logs);
+     } else {
+diff --git a/src/Movim/Bootstrap.php b/src/Movim/Bootstrap.php
+index e403f115e..645296444 100644
+--- a/src/Movim/Bootstrap.php
++++ b/src/Movim/Bootstrap.php
+@@ -53,10 +53,6 @@ class Bootstrap
+         if (!file_exists(PUBLIC_CACHE_PATH) && !@mkdir(PUBLIC_CACHE_PATH)) {
+             throw new \Exception('Couldn’t create public cache directory');
+         }
+-
+-        if (!file_exists(config('paths.log')) && !@mkdir(config('paths.log'))) {
+-            throw new \Exception('Couldn’t create log directory');
+-        }
+     }
+ 
+     private function setConstants()
+@@ -309,7 +305,7 @@ class Bootstrap
+             : $error;
+ 
+         if (php_sapi_name() != 'cli' && ob_get_contents() == '') {
+-            echo 'An error occured during the Movim boot check the ' . config('paths.log') . 'error.log file' . "\n";
++            echo 'An error occured during the Movim boot check the standard error' . "\n";
+         }
+ 
+         logError($fullError);
+-- 
+2.48.1
+

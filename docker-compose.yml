@@ -1,0 +1,52 @@
+services:
+  postgres:
+    restart: always
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: movim
+      POSTGRES_USER: movim
+      POSTGRES_PASSWORD: movim
+  web:
+    restart: always
+    build:
+      context: .
+      target: web
+    environment:
+      FPM_HOST: fpm # Connect to php-fpm using container name instead of localhost.
+      DAEMON_HOST: daemon # Connect to the movim daemon.
+    ports:
+      - "8080:80"
+    volumes:
+      - ./cache:/var/www/movim/cache:ro # TODO: Verify if this one is needed.
+      - ./public-cache:/var/www/movim/public/cache:ro
+    links:
+      - fpm
+      - daemon
+  fpm:
+    restart: always
+    build:
+      context: .
+      target: fpm
+    environment:
+      FPM_LISTEN: 0.0.0.0 # Listen everywhere for docker-compose.
+    volumes:
+      - ./movim.env:/var/www/movim/.env
+      - ./cache:/var/www/movim/cache:rw
+      - ./public-cache:/var/www/movim/public/cache:rw
+    links:
+      - postgres
+    depends_on:
+      - postgres
+  daemon:
+    restart: always
+    build:
+      context: .
+      target: daemon
+    volumes:
+      - ./movim.env:/var/www/movim/.env
+      - ./cache:/var/www/movim/cache:rw
+      - ./public-cache:/var/www/movim/public/cache:rw
+    links:
+      - postgres
+    depends_on:
+      - postgres
