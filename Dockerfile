@@ -7,11 +7,6 @@ ARG MOVIM_VERSION=v0.29.2
 ADD https://github.com/movim/movim/archive/refs/tags/${MOVIM_VERSION}.tar.gz .
 RUN tar -xzf "${MOVIM_VERSION}.tar.gz" && mv movim-* movim # Remove version suffix.
 
-FROM nginx:1.27.4-alpine as nginx
-
-COPY --from=downloader /work/movim /var/www/movim
-COPY default.nginx.conf /etc/nginx/conf.d/default.conf
-
 FROM alpine:3.21.3 as fpm
 
 # https://github.com/docker-library/php/blob/7deb69be16bf95dfd1f37183dc20e8fd21306bbc/8.4/alpine3.21/fpm/Dockerfile#L32
@@ -44,11 +39,14 @@ EOF
 RUN <<EOF
   set -e 
 
-  sed -i 's|;error_log = .*|error_log = /proc/self/fd/2|' /etc/php/php-fpm.conf
+  # The format of php-fpm.conf is such that appending would make the directive belong to a different seciton.
+  sed -i 's|;error_log = .*|error_log = /proc/self/fd/2|' /etc/php/php-fpm.conf # Log to stderr.
 
-  echo 'access.log = /proc/self/fd/2' >> /etc/php/php-fpm.d/www.conf
-  echo 'catch_workers_output = yes' >> /etc/php/php-fpm.d/www.conf
-  echo 'listen = 9000' >> /etc/php/php-fpm.d/www.conf
+  {
+    echo 'access.log = /proc/self/fd/2' # Log to stderr.
+    echo 'catch_workers_output = yes' # Log workers to stderr.
+    echo 'listen = 9000' # FIXME: For compose only, remove for k8s.
+  } >> /etc/php/php-fpm.d/www.conf
 EOF
 
 COPY --from=downloader /work/movim /var/www/movim
