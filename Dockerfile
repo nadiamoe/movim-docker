@@ -31,6 +31,10 @@ RUN <<EOF
 
   composer install
 
+  # Remove files that allow trivial fingerprinting.
+  rm -- VERSION doap.xml composer.* *.md *.txt
+
+  # Create directories where movim needs to write things.
   mkdir -p log cache public
   chown www-data log cache public
 EOF
