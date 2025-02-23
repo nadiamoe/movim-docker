@@ -8,9 +8,7 @@ services:
       POSTGRES_PASSWORD: movim
   web:
     restart: always
-    build:
-      context: .
-      target: nginx
+    image: nginx:1.27.4-alpine
     ports:
       - "8080:80"
     volumes:
@@ -24,7 +22,7 @@ services:
       context: .
       target: fpm
     volumes:
-      - ./movim.env:/var/www/movim/.env
+      - ./movim.env:/var/www/movim/.env:ro
       - ./cache:/var/www/movim/cache:rw
       - ./log:/var/www/movim/log:rw
     links:
@@ -37,7 +35,7 @@ services:
       context: .
       target: daemon
     volumes:
-      - ./movim.env:/var/www/movim/.env
+      - ./movim.env:/var/www/movim/.env:ro
       - ./cache:/var/www/movim/cache:rw
       - ./log:/var/www/movim/log:rw
     links:
