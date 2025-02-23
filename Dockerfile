@@ -12,18 +12,19 @@ FROM nginx:1.27.4-alpine as nginx
 COPY --from=downloader /work/movim /var/www/movim
 COPY default.nginx.conf /etc/nginx/conf.d/default.conf
 
-FROM php:8.4.4-fpm-alpine as fpm
+FROM alpine:3.21.3 as fpm
+
+# https://github.com/docker-library/php/blob/7deb69be16bf95dfd1f37183dc20e8fd21306bbc/8.4/alpine3.21/fpm/Dockerfile#L32
+RUN adduser -u 82 -D -S -G www-data www-data
 
 WORKDIR /var/www
 
 RUN <<EOF
-  set -e
-
-  rmdir html # Included in the default image
-
   apk add --no-cache \
     git \
     unzip \
+    php \
+    php-fpm \
     php-curl \
     php-gd \
     php-dom \
@@ -32,6 +33,8 @@ RUN <<EOF
     php-pgsql \
     php-pecl-imagick \
     composer
+
+  which php-fpm || ln -s /usr/sbin/php-fpm* /usr/sbin/php-fpm
 EOF
 
 COPY --from=downloader /work/movim /var/www/movim
@@ -46,6 +49,8 @@ RUN <<EOF
   mkdir -p log cache public
   chown www-data log cache public
 EOF
+
+ENTRYPOINT [ "php-fpm" ]
 
 FROM fpm as daemon
 
