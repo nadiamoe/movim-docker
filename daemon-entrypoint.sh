@@ -2,5 +2,8 @@
 
 set -e
 
+echo "Running migrations"
 php vendor/bin/phinx migrate
-php daemon.php start
+
+echo "Running daemon"
+php daemon.php start --debug
