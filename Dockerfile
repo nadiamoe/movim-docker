@@ -23,6 +23,7 @@ RUN <<EOF
   apk add --no-cache \
     git \
     unzip \
+    tini \
     php \
     php-fpm \
     php-curl \
@@ -50,13 +51,14 @@ RUN <<EOF
   chown www-data log cache public
 EOF
 
-ENTRYPOINT [ "php-fpm" ]
+ENTRYPOINT [ "tini", "--", "php-fpm" ]
 
 FROM fpm as daemon
 
 RUN apk add --no-cache tini
 
-USER www-data
 WORKDIR /var/www/movim
-ENTRYPOINT [ "tini", "php", "daemon.php" ]
-CMD [ "start" ]
+COPY --chmod=0555 daemon-entrypoint.sh .
+
+USER www-data
+ENTRYPOINT [ "tini", "--", "/var/www/movim/daemon-entrypoint.sh" ]
