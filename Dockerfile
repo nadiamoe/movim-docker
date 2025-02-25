@@ -9,7 +9,7 @@ RUN tar -xzf "${MOVIM_VERSION}.tar.gz" && mv movim-* movim # Remove version suff
 
 FROM nginx:1.27.4-alpine as nginx
 
-COPY --from=downloader /work/movim/public /var/www/movim/public
+COPY --from=downloader /work/movim/ /var/www/movim/
 
 FROM alpine:3.21.3 as fpm
 
