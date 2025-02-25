@@ -14,7 +14,8 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./default.nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./default.nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public-cache:/var/www/movim/public/cache:rw
     links:
       - fpm
       - daemon
@@ -26,6 +27,7 @@ services:
     volumes:
       - ./movim.env:/var/www/movim/.env
       - ./cache:/var/www/movim/cache:rw
+      - ./public-cache:/var/www/movim/public/cache:rw
       - ./log:/var/www/movim/log:rw
     links:
       - postgres
@@ -39,6 +41,7 @@ services:
     volumes:
       - ./movim.env:/var/www/movim/.env
       - ./cache:/var/www/movim/cache:rw
+      - ./public-cache:/var/www/movim/public/cache:rw
       - ./log:/var/www/movim/log:rw
     links:
       - postgres
