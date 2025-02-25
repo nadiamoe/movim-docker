@@ -7,6 +7,10 @@ ARG MOVIM_VERSION=v0.29.2
 ADD https://github.com/movim/movim/archive/refs/tags/${MOVIM_VERSION}.tar.gz .
 RUN tar -xzf "${MOVIM_VERSION}.tar.gz" && mv movim-* movim # Remove version suffix.
 
+FROM nginx:1.27.4-alpine as nginx
+
+COPY --from=downloader /work/movim/public /var/www/movim/public
+
 FROM alpine:3.21.3 as fpm
 
 # https://github.com/docker-library/php/blob/7deb69be16bf95dfd1f37183dc20e8fd21306bbc/8.4/alpine3.21/fpm/Dockerfile#L32
