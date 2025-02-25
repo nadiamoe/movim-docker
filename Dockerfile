@@ -30,6 +30,7 @@ RUN <<EOF
     php-pdo_pgsql \
     php-pgsql \
     php-pecl-imagick \
+    php-opcache \
     composer
 
   which php-fpm || ln -s /usr/sbin/php-fpm* /usr/sbin/php-fpm
