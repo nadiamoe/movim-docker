@@ -48,6 +48,7 @@ RUN <<EOF
 
   # The format of php-fpm.conf is such that appending would make the directive belong to a different seciton.
   sed -i 's|;error_log = .*|error_log = /proc/self/fd/2|' /etc/php/php-fpm.conf # Log to stderr.
+  sed -i 's|;error_log = .*|error_log = /proc/self/fd/2|' /etc/php/php.ini # Log to stderr.
 
   {
     echo 'access.log = /proc/self/fd/2' # Log to stderr.
