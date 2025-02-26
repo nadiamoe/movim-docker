@@ -1,11 +1,16 @@
 FROM alpine:3.21.3 as downloader
 
 WORKDIR /work
+RUN apk add --no-cache patch
 
 # Renovate updates the version below, which is also grepped by CI/CD to produce the build tag. Do not chage its format.
 ARG MOVIM_VERSION=v0.29.2
 ADD https://github.com/movim/movim/archive/refs/tags/${MOVIM_VERSION}.tar.gz .
 RUN tar -xzf "${MOVIM_VERSION}.tar.gz" && mv movim-* movim # Remove version suffix.
+
+COPY log-stderr.patch .
+WORKDIR /work/movim
+RUN patch -p1 < /work/log-stderr.patch
 
 FROM nginx:1.27.4-alpine as nginx
 
@@ -66,8 +71,10 @@ RUN <<EOF
   composer install
 
   # Create directories where movim needs to write things.
-  mkdir -p log cache public
-  chown www-data log cache public
+  for d in cache public public/cache; do
+    test -d "$d" || mkdir "$d"
+    chown www-data "$d"
+  done
 EOF
 
 WORKDIR /var/www/movim
