@@ -48,6 +48,9 @@ RUN <<EOF
   test -d /etc/php || ln -s /etc/php* /etc/php
 EOF
 
+# docker-compose.yml sets this to `0.0.0.0` instead, you'll want that outside of kubernetes.
+ARG FPM_LISTEN=localhost
+
 RUN <<EOF
   set -e 
 
@@ -58,7 +61,7 @@ RUN <<EOF
   {
     echo 'access.log = /proc/self/fd/2' # Log to stderr.
     echo 'catch_workers_output = yes' # Log workers to stderr.
-    echo 'listen = 9000' # FIXME: For compose only, remove for k8s.
+    echo "listen = ${FPM_LISTEN}:9000"
   } >> /etc/php/php-fpm.d/www.conf
 EOF
 
