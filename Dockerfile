@@ -12,6 +12,9 @@ COPY log-stderr.patch .
 WORKDIR /work/movim
 RUN patch -p1 < /work/log-stderr.patch
 
+# Build-time assert that no 'paths.log' remains in the codebase
+RUN if grep -Rle "'paths.log'" .; then exit 1; fi
+
 FROM nginx:1.27.4-alpine as nginx
 
 COPY --from=downloader /work/movim/ /var/www/movim/
