@@ -27,9 +27,9 @@ RUN <<EOF
   set -e 
 
   apk add --no-cache \
-    git \
     unzip \
     tini \
+    ca-certificates \
     php \
     php-fpm \
     php-curl \
