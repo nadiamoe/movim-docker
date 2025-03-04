@@ -8,9 +8,14 @@ ARG MOVIM_VERSION=v0.29.2
 ADD https://github.com/movim/movim/archive/refs/tags/${MOVIM_VERSION}.tar.gz .
 RUN tar -xzf "${MOVIM_VERSION}.tar.gz" && mv movim-* movim # Remove version suffix.
 
-COPY log-stderr.patch .
+COPY *.patch .
 WORKDIR /work/movim
-RUN patch -p1 < /work/log-stderr.patch
+RUN <<EOF
+  set -e
+  for p in ../*.patch; do
+    patch -p1 < "$p"
+  done
+EOF
 
 # Build-time assert that no 'paths.log' remains in the codebase
 RUN if grep -Rle "'paths.log'" .; then exit 1; fi

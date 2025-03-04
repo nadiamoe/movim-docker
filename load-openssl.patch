@@ -1,0 +1,26 @@
+From d2169bf47b626160762dd7429199e86a94d2341e Mon Sep 17 00:00:00 2001
+From: Nadia Santalla <nadia@santalla.io>
+Date: Tue, 4 Mar 2025 10:42:30 +0100
+Subject: [PATCH] daemon: load openssl extension
+
+---
+ src/Movim/Daemon/Session.php | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/Movim/Daemon/Session.php b/src/Movim/Daemon/Session.php
+index 4d9f8f653..0d068662d 100644
+--- a/src/Movim/Daemon/Session.php
++++ b/src/Movim/Daemon/Session.php
+@@ -42,7 +42,8 @@ class Session
+         'curl',
+         'dom',
+         'mbstring',
+-        'simplexml'
++        'simplexml',
++        'openssl'
+     ];
+ 
+     public function __construct(
+-- 
+2.48.1
+
