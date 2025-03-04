@@ -29,25 +29,30 @@ WORKDIR /var/www
 RUN <<EOF
   set -e 
 
+  export php=php82
+
   apk add --no-cache \
+    curl \
     unzip \
     tini \
     ca-certificates \
-    php \
-    php-fpm \
-    php-curl \
-    php-gd \
-    php-dom \
-    php-pdo \
-    php-pdo_pgsql \
-    php-pgsql \
-    php-pecl-imagick \
-    php-opcache \
-    php-xml \
-    php-openssl \
-    composer
+    $php \
+    $php-fpm \
+    $php-curl \
+    $php-gd \
+    $php-dom \
+    $php-mbstring \
+    $php-pdo \
+    $php-pdo_pgsql \
+    $php-pgsql \
+    $php-pecl-imagick \
+    $php-opcache \
+    $php-xml \
+    $php-openssl \
+    $php-phar
 
   which php-fpm || ln -s /usr/sbin/php-fpm* /usr/sbin/php-fpm
+  which php || ln -s /usr/bin/php* /usr/bin/php
   test -d /etc/php || ln -s /etc/php* /etc/php
 EOF
 
@@ -74,7 +79,8 @@ WORKDIR /var/www/movim
 RUN <<EOF
   set -e
 
-  composer install
+  curl -sS https://getcomposer.org/installer | php
+  php composer.phar install
 
   # Create directories where movim needs to write things.
   for d in cache public public/cache; do
@@ -93,5 +99,5 @@ FROM fpm as daemon
 WORKDIR /var/www/movim
 COPY --chmod=0555 daemon-entrypoint.sh .
 
-USER www-data
+USER root
 ENTRYPOINT [ "tini", "--", "/var/www/movim/daemon-entrypoint.sh" ]
