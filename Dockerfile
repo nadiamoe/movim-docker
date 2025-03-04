@@ -19,7 +19,7 @@ RUN <<EOF
 EOF
 
 # Build-time assert that no 'paths.log' remains in the codebase
-RUN if grep -Rle "'paths.log'" .; then exit 1; fi
+RUN ! grep -Rle "'paths.log'" .
 
 FROM nginx:1.27.4-alpine AS nginx
 
@@ -76,22 +76,12 @@ RUN <<EOF
 EOF
 
 COPY --from=downloader /work/movim /var/www/movim
-WORKDIR /var/www/movim
-
-RUN <<EOF
-  set -e
-
-  composer install
-
-  # Create directories where movim needs to write things.
-  for d in cache public public/cache; do
-    test -d "$d" || mkdir "$d"
-    chown www-data "$d"
-  done
-EOF
 
 WORKDIR /var/www/movim
+RUN composer install
+
 USER www-data
+
 ENTRYPOINT [ "tini", "--", "php-fpm" ]
 CMD [ "-F", "-O" ]
 
@@ -100,5 +90,4 @@ FROM fpm AS daemon
 WORKDIR /var/www/movim
 COPY --chmod=0555 daemon-entrypoint.sh .
 
-USER www-data
 ENTRYPOINT [ "tini", "--", "/var/www/movim/daemon-entrypoint.sh" ]
