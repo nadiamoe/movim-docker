@@ -1,4 +1,5 @@
-FROM alpine:3.21.3 AS downloader
+FROM alpine:3.21.3 AS base
+FROM base AS downloader
 
 WORKDIR /work
 RUN apk add --no-cache patch
@@ -24,7 +25,7 @@ FROM nginx:1.27.4-alpine AS nginx
 
 COPY --from=downloader /work/movim/ /var/www/movim/
 
-FROM alpine:3.21.3 AS fpm
+FROM base AS fpm
 
 # https://github.com/docker-library/php/blob/7deb69be16bf95dfd1f37183dc20e8fd21306bbc/8.4/alpine3.21/fpm/Dockerfile#L32
 RUN adduser -u 82 -D -S -G www-data www-data
