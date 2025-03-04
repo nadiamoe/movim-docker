@@ -1,4 +1,4 @@
-FROM alpine:3.21.3 as downloader
+FROM alpine:3.21.3 AS downloader
 
 WORKDIR /work
 RUN apk add --no-cache patch
@@ -20,11 +20,11 @@ EOF
 # Build-time assert that no 'paths.log' remains in the codebase
 RUN if grep -Rle "'paths.log'" .; then exit 1; fi
 
-FROM nginx:1.27.4-alpine as nginx
+FROM nginx:1.27.4-alpine AS nginx
 
 COPY --from=downloader /work/movim/ /var/www/movim/
 
-FROM alpine:3.21.3 as fpm
+FROM alpine:3.21.3 AS fpm
 
 # https://github.com/docker-library/php/blob/7deb69be16bf95dfd1f37183dc20e8fd21306bbc/8.4/alpine3.21/fpm/Dockerfile#L32
 RUN adduser -u 82 -D -S -G www-data www-data
@@ -94,7 +94,7 @@ USER www-data
 ENTRYPOINT [ "tini", "--", "php-fpm" ]
 CMD [ "-F", "-O" ]
 
-FROM fpm as daemon
+FROM fpm AS daemon
 
 WORKDIR /var/www/movim
 COPY --chmod=0555 daemon-entrypoint.sh .
