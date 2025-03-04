@@ -44,6 +44,7 @@ RUN <<EOF
     php-pecl-imagick \
     php-opcache \
     php-xml \
+    php-simplexml \
     php-openssl \
     composer
 
