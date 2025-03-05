@@ -24,6 +24,11 @@ RUN ! grep -Rle "'paths.log'" .
 FROM nginx:1.27.4-alpine AS nginx
 
 COPY --from=downloader /work/movim/ /var/www/movim/
+COPY --chmod=440 default.nginx.conf /etc/nginx/templates/default.conf.template
+
+# On k8s, assume php-fpm is running as a sidecar and connect there.
+# When running in docker-compose, set this variable in your docker-compose.yaml to `fpm`.
+ENV FASTCGI_HOST=localhost
 
 FROM base AS fpm
 
@@ -58,9 +63,6 @@ RUN <<EOF
   test -d /etc/php || ln -s /etc/php* /etc/php
 EOF
 
-# docker-compose.yml sets this to `0.0.0.0` instead, you'll want that outside of kubernetes.
-ARG FPM_LISTEN=localhost
-
 RUN <<EOF
   set -e 
 
@@ -71,7 +73,7 @@ RUN <<EOF
   {
     echo 'access.log = /proc/self/fd/2' # Log to stderr.
     echo 'catch_workers_output = yes' # Log workers to stderr.
-    echo "listen = ${FPM_LISTEN}:9000"
+    echo 'listen = ${FPM_LISTEN}:9000' 
   } >> /etc/php/php-fpm.d/www.conf
 EOF
 
@@ -81,6 +83,10 @@ WORKDIR /var/www/movim
 RUN composer install
 
 USER www-data
+
+# Use localhost for k8s when running fpm as a sidecar to nginx.
+# When running in docker-compose, set this variable in your docker-compose.yaml to `0.0.0.0` instead.
+ENV FPM_LISTEN=localhost
 
 ENTRYPOINT [ "tini", "--", "php-fpm" ]
 CMD [ "-F", "-O" ]
