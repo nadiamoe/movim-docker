@@ -10,7 +10,7 @@ services:
     restart: always
     build:
       context: .
-      target: nginx
+      target: web
     environment:
       FASTCGI_HOST: fpm # Connect to php-fpm using container name instead of localhost.
     ports:

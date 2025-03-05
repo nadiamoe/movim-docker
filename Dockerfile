@@ -21,7 +21,7 @@ EOF
 # Build-time assert that no 'paths.log' remains in the codebase
 RUN ! grep -Rle "'paths.log'" .
 
-FROM nginx:1.27.4-alpine AS nginx
+FROM nginx:1.27.4-alpine AS web
 
 COPY --from=downloader /work/movim/ /var/www/movim/
 COPY --chmod=440 default.nginx.conf /etc/nginx/templates/default.conf.template
