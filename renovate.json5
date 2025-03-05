@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>nadiamoe/renovate-config",
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "movim/movim",
+      "fileMatch": ["Dockerfile"],
+      "matchStrings": [
+        "ARG MOVIM_VERSION=(?<currentValue>\\S+)",
+      ],
+    },
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "movim/movim",
+      ],
+      "versioning": "loose", // It seems like not all tags are semver.
+      "automerge": false, // Do not even think about it.
+    },
+  ],
+}
