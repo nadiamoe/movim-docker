@@ -64,10 +64,6 @@ RUN <<EOF
 
   which php-fpm || ln -s /usr/sbin/php-fpm* /usr/sbin/php-fpm
   test -d /etc/php || ln -s /etc/php* /etc/php
-EOF
-
-RUN <<EOF
-  set -e 
 
   # The format of php-fpm.conf is such that appending would make the directive belong to a different seciton.
   sed -i 's|;error_log = .*|error_log = /proc/self/fd/2|' /etc/php/php-fpm.conf # Log to stderr.
